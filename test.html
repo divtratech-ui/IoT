@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>MQTT LED Dashboard</title>
+</head>
+
+
+<body>
+
+<h2>LED Control</h2>
+
+<!-- Update this button line in index.html -->
+<button id="voiceBtn" style="padding: 10px; cursor: pointer;">🎤 Hold to Speak (Voice Control)</button>
+
+<p id="speechOutput">Say "on light" or "off light"</p>
+
+<button onclick="send('ON')">
+ON
+</button>
+
+
+<button onclick="send('OFF')">
+OFF
+</button>
+
+
+<h3>Status:</h3>
+<p id="status">Unknown</p>
+
+
+<h3>Logs:</h3>
+<div id="logs"></div>
+
+
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<script src="speech2text.js"></script>
+
+
+<script>
+
+
+const client = mqtt.connect(
+"wss://mqtt-dashboard.com:8884/mqtt"
+);
+
+
+const controlTopic = "home/led/control";
+
+
+client.on("connect",()=>{
+
+console.log("Connected");
+
+
+client.subscribe("home/led/status");
+
+client.subscribe("home/led/log");
+
+
+});
+
+
+
+
+function send(command)
+{
+
+client.publish(
+controlTopic,
+command
+);
+
+}
+
+
+
+
+
+client.on("message",(topic,message)=>{
+
+
+let msg = message.toString();
+
+
+if(topic=="home/led/status")
+{
+document.getElementById("status").innerHTML =
+"LED: "+msg;
+}
+
+
+
+if(topic=="home/led/log")
+{
+
+let log =
+document.createElement("p");
+
+
+log.innerHTML =
+msg;
+
+
+document.getElementById("logs")
+.appendChild(log);
+
+}
+
+
+});
+
+
+
+</script>
+
+
+</body>
+</html>
